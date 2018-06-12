@@ -56,13 +56,13 @@ class Wrap {
                 function finnish() {
                     let now = new Date().getTime();
                     let elapsedTime = now - startTime;
-                    if(elapsedTime > timeLimit) {
+                    if(elapsedTime > timeLimit) { // timeout
                         conn.close();
                         reject({ error: `Connection timeout! maximum wait time is ${timeLimit / 1000}s, you probably forgot to start your Worker run 'python messenger.py'` });
-                    } else if(self.status == Status.SUCCESS){
+                    } else if(self.status == Status.SUCCESS){ // success
                         conn.close();
                         resolve(result);
-                    } else if (self.status == Status.ERROR){
+                    } else if (self.status == Status.ERROR){ // error
                         conn.close();
                         reject({ error: 'An error ocurred!' });
                     } else {
