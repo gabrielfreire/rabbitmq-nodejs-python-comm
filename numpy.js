@@ -35,9 +35,12 @@ class Numpy {
 
     async _wrap(input) {
         return new Promise(async (resolve, reject) => {
-            let result = await this.wrap.exec(input);
-            if(!result) reject({ error: 'no result returned' });
-            resolve(result.data);
+            try{
+                let result = await this.wrap.exec(input);
+                resolve(result.data);
+            } catch(e) {
+                reject({ error: e.error });
+            }
         });
     }
 }

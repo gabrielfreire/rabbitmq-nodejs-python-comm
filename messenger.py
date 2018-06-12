@@ -11,7 +11,7 @@ def define_connection(url):
     return connection
 
 def setup_channel(conn, queues):
-    channel = connection.channel()
+    channel = conn.channel()
     for q in queues:
         channel.queue_declare(queue=q)
     return channel
@@ -63,7 +63,7 @@ url_str = os.environ.get('CLOUDAMQP_URL', 'amqp://guest:guest@localhost//')
 url = urlparse(url_str)
 
 connection = define_connection(url)
-channel = setup_channel(connection, ['compute', 'result'])
+channel = setup_channel(conn=connection, queues=['compute', 'result'])
 
 #  receive message and complete computation
 channel.basic_consume(handle_delivery,

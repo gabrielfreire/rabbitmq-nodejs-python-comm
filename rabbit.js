@@ -21,10 +21,19 @@ class Wrap {
         this.status = Status.UNINITIALIZED;
         return new Promise((resolve, reject) => {
             let result;
+            let timeLimit = 5 * 1000;
             amqp.connect(this.connectionUrl, function (err, conn) {
-                if(err) reject({ error: err });
+                if(err) {
+                    self.status == Status.ERROR;
+                    conn.close();
+                    reject({ error: `An error ocurred: ${err}` });
+                }
                 conn.createChannel(function (err, ch) {
-                    if(err) reject({ error: err });
+                    if(err)  {
+                        self.status == Status.ERROR;
+                        conn.close();
+                        reject({ error: `An error ocurred: ${err}` });
+                    };
                     // create queues
                     var compute = 'compute';
                     ch.assertQueue(compute, { durable: false });
@@ -33,7 +42,6 @@ class Wrap {
         
                     // send data to queue
                     ch.sendToQueue(compute, new Buffer(JSON.stringify(input), {persistent: true}));
-        
                     // receive data from result queue
                     ch.consume(results, function (msg) {
                         // res.send(msg.content.toString());
@@ -43,9 +51,15 @@ class Wrap {
                         else self.status = Status.SUCCESS;
                     }, { noAck: true });
                 });
+                let startTime = new Date().getTime();
                 // try until its ready
                 function finnish() {
-                    if(self.status == Status.SUCCESS){
+                    let now = new Date().getTime();
+                    let elapsedTime = now - startTime;
+                    if(elapsedTime > timeLimit) {
+                        conn.close();
+                        reject({ error: `Connection timeout! maximum wait time is ${timeLimit / 1000}s, you probably forgot to start your Worker run 'python messenger.py'` });
+                    } else if(self.status == Status.SUCCESS){
                         conn.close();
                         resolve(result);
                     } else if (self.status == Status.ERROR){
