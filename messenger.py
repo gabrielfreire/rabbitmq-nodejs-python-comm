@@ -27,26 +27,34 @@ def handle_delivery(ch, method, properties, body):
         sims = int(requestParams[3])
     '''
     requestParams = json.loads(body.decode('utf-8'))
-    if requestParams['action'] == 'sum':
+    if requestParams['type'] == 'sum':
         results = {}
         results['data'] = int(np.sum(requestParams['data']))
-    elif requestParams['action'] == 'max':
+    elif requestParams['type'] == 'max':
         results = {}
         results['data'] = int(np.max(requestParams['data']))
-    elif requestParams['action'] == 'min':
+    elif requestParams['type'] == 'min':
         results = {}
         results['data'] = int(np.min(requestParams['data']))
-    elif requestParams['action'] == 'std':
+    elif requestParams['type'] == 'std':
         results = {}
         results['data'] = int(np.std(requestParams['data']))
-    elif requestParams['action'] == 'mean':
+    elif requestParams['type'] == 'mean':
         results = {}
         results['data'] = int(np.mean(requestParams['data']))
+    elif requestParams['type'] == 'arange':
+        results = {}
+        start = requestParams['data']['start']
+        stop = requestParams['data']['stop']
+        step = requestParams['data']['step']
+        dtype = requestParams['data']['dtype']
+        results['data'] = np.arange(start, stop, step, dtype=dtype).tolist()
 
     # send a message back
     ch.basic_publish(exchange='',
-                          routing_key='results',
-                          body=json.dumps(results, ensure_ascii=False))
+                          routing_key='result',
+                          body=json.dumps(results, ensure_ascii=False),
+                          properties = pika.BasicProperties(delivery_mode=2))
 
     # connection.close()
 
@@ -55,7 +63,7 @@ url_str = os.environ.get('CLOUDAMQP_URL', 'amqp://guest:guest@localhost//')
 url = urlparse(url_str)
 
 connection = define_connection(url)
-channel = setup_channel(connection, ['compute', 'results'])
+channel = setup_channel(connection, ['compute', 'result'])
 
 #  receive message and complete computation
 channel.basic_consume(handle_delivery,

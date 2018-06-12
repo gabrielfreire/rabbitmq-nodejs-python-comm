@@ -1,43 +1,21 @@
-const fs = require('fs');
-const path = require('path');
-const amqp = require('amqplib/callback_api');
-const amqpurl = process.env.CLOUDAMQP_URL || "amqp://localhost";
-const dataUrl = path.join(__dirname, 'data/train.csv'); 
-const input = {
-    action: 'sum',
-    data: [123,3,4,53,321]
+const Numpy = require('./numpy');
+const np = new Numpy();
+
+async function init() {
+    let startTime = new Date().getTime();
+    let arr = await np.arange(10, 10240, 2);
+    let max = await np.max(arr);
+    let sum = await np.sum(arr);
+    let std = await np.std(arr);
+    let min = await np.min(arr);
+    let mean = await np.mean(arr);
+    console.log(`max -> ${max}`);
+    console.log(`min -> ${min}`);
+    console.log(`sum -> ${sum}`);
+    console.log(`std -> ${std}`);
+    console.log(`mean -> ${mean}`);
+    console.log(`arange array length -> ${arr.length}`);
+    let endTime = new Date().getTime();
+    console.log(`It took ${(endTime - startTime) / (60 * 1000)}s to finnish`);
 }
-const dataInput = {
-    action: 'data',
-    data: dataUrl
-}
-
-_getRabbitMQConnection(dataInput);
-
-function _getRabbitMQConnection(input, callback) {
-    /**
-        Talk to python throught RabbitMQ on messaging.py
-    */
-    
-    amqp.connect(amqpurl, function (err, conn) {
-        conn.createChannel(function (err, ch) {
-            // create queues
-            var compute = 'compute';
-            ch.assertQueue(compute, { durable: false });
-            var results = 'results';
-            ch.assertQueue(results, { durable: false });
-
-            // send data to queue
-            ch.sendToQueue(compute, new Buffer(JSON.stringify(input)));
-
-            // receive data from result queue
-            ch.consume(results, function (msg) {
-                // res.send(msg.content.toString());
-                console.log(`Result for ${input.action}: ${msg.content.toString()}`);
-                
-                if(callback) callback(msg.content.toString());
-            }, { noAck: true });
-        });
-        setTimeout(function () { conn.close(); }, 500);  
-    });
-}
+init()
