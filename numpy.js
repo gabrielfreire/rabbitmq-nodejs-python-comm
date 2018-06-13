@@ -1,10 +1,12 @@
 /**
  * Numpy wrapper
  */
-const Wrap = require('./rabbit');
+const AMQWrap = require('./rabbit');
+const ZMQWrap = require('./zeromq');
 class Numpy {
     constructor(){
-        this.wrap = new Wrap();
+        // this.wrap = new AMQWrap(); // RabbitMQ wrapper
+        this.wrap = new ZMQWrap(); // ZeroMQ wrapper
     }
 
     async max(ndarray){
@@ -39,7 +41,7 @@ class Numpy {
                 let result = await this.wrap.exec(input);
                 resolve(result.data);
             } catch(e) {
-                reject({ error: e.error });
+                reject({ error: e });
             }
         });
     }

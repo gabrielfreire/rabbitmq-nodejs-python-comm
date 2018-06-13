@@ -17,9 +17,10 @@ async function init() {
         console.log(`mean -> ${mean}`);
         console.log(`arange array length -> ${arr.length}`);
     } catch(e) {
-        console.error(e.error);
+        console.error(e);
     }
     let endTime = new Date().getTime();
     console.log(`It took ${(endTime - startTime) / 1000}s`);
+    process.exit(0);
 }
 init();

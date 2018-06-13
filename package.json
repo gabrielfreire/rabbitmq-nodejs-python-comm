@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "messenger": "python messenger.py",
+    "messenger": "python rabbit_messenger.py",
     "start": "node index.js",
     "fire": "concurrently --kill-others \"npm run messenger\" \"npm run start\" "
   },
@@ -13,6 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "amqplib": "^0.5.2",
-    "concurrently": "^3.5.1"
+    "concurrently": "^3.5.1",
+    "zeromq": "^4.6.0"
   }
 }

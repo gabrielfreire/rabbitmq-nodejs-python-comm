@@ -7,7 +7,7 @@ const Status = {
     SUCCESS: 'success',
     UNINITIALIZED: 'not ready'
 }
-class Wrap {
+class AMQWrap {
     constructor(connectionUrl) {
         this.connectionUrl = connectionUrl || amqpurl;
         this.status = Status.UNINITIALIZED;
@@ -74,4 +74,4 @@ class Wrap {
         })
    }
 }
-module.exports = Wrap;
+module.exports = AMQWrap;
