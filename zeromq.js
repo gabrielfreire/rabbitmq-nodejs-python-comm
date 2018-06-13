@@ -26,22 +26,23 @@ class ZMQWrap {
             let result;
             let timeLimit = (60 * 1000) * 5;
             let startTime = new Date().getTime();
-            if(input.type == 'train') timeLimit = null;
-            subscriber.on('message', (reply) => {
-                result = JSON.parse(reply.toString());
-                if(!result) this.status = Status.ERROR;
-                if(result.data.epoch == (input.epochs - 1)) {
-                    self.status = Status.SUCCESS;
-                }
-                // TODO: send event to train class for each epoch
-                console.log(`Received real-time data: Epoch -> ${result.data.epoch}`);
-            });
-            subscriber.connect(this.subscriberUrl);
-            subscriber.subscribe("");
+            if(input.type == 'train'){
+                timeLimit = null;
+                subscriber.on('message', (reply) => {
+                    result = JSON.parse(reply.toString());
+                    if(!result) this.status = Status.ERROR;
+                    if(result.data.epoch == (input.epochs - 1)) {
+                        self.status = Status.SUCCESS;
+                    }
+                    // TODO: send event to train class for each epoch
+                    console.log(`Received real-time data: Epoch -> ${result.data.epoch}`);
+                });
+                subscriber.connect(this.subscriberUrl);
+                subscriber.subscribe("");
+            }
         
             requester.send(JSON.stringify(input));
             requester.on("message", function(reply) {
-                console.log(reply.toString());
                 result = JSON.parse(reply.toString());
                 self.status = Status.SUCCESS;
             });
