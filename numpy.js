@@ -34,6 +34,10 @@ class Numpy {
         const input = { type: 'sum', data: ndarray };
         return await this._wrap(input);
     }
+    async train(epochs){
+        const input = { type: 'train', epochs: epochs };
+        return await this._wrap(input);
+    }
     async arange(start, stop = null, step = null, dtype = null){
         if(!start) throw { error: 'The 1st(start) argument is required' };
         const input = { type: 'arange', data: { start: start, stop: stop, step: step, dtype: dtype } };

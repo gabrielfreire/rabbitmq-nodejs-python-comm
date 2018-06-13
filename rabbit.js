@@ -71,7 +71,7 @@ class AMQWrap {
                 }
                 finnish();
             });
-        })
+        });
    }
 }
 module.exports = AMQWrap;

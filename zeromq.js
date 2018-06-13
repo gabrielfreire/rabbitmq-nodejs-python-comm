@@ -1,6 +1,7 @@
 
 const zmq = require('zeromq');
-const requester = zmq.socket('req');
+const requester = zmq.socket('req'); // data-io
+const subscriber = zmq.socket('sub'); // real-time
 
 const Status = {
     ERROR: 'error',
@@ -10,7 +11,8 @@ const Status = {
 class ZMQWrap {
     constructor(connectionUrl) {
         let local = 'tcp://localhost';
-        this.connectionUrl = connectionUrl || `${process.env.URL || local}:5563`;
+        this.requesterUrl = connectionUrl || `${process.env.URL || local}:5563`;
+        this.subscriberUrl = connectionUrl || `${process.env.URL || local}:5562`;
         this.status = Status.UNINITIALIZED;
     }
 
@@ -22,31 +24,50 @@ class ZMQWrap {
         this.status = Status.UNINITIALIZED;
         return new Promise((resolve, reject) => {
             let result;
-            let timeLimit = 5 * 1000;
+            let timeLimit = (60 * 1000) * 5;
             let startTime = new Date().getTime();
+            if(input.type == 'train') timeLimit = null;
+            subscriber.on('message', (reply) => {
+                result = JSON.parse(reply.toString());
+                if(!result) this.status = Status.ERROR;
+                if(result.data.epoch == (input.epochs - 1)) {
+                    self.status = Status.SUCCESS;
+                }
+                // TODO: send event to train class for each epoch
+                console.log(`Received real-time data: Epoch -> ${result.data.epoch}`);
+            });
+            subscriber.connect(this.subscriberUrl);
+            subscriber.subscribe("");
+        
             requester.send(JSON.stringify(input));
             requester.on("message", function(reply) {
-                // console.log(`Received reply: [ ${reply.toString()} ]`);
+                console.log(reply.toString());
                 result = JSON.parse(reply.toString());
                 self.status = Status.SUCCESS;
             });
-            requester.connect(this.connectionUrl);
+            requester.connect(this.requesterUrl);
+            
             // try until its ready
             function finnish() {
                 let now = new Date().getTime();
                 let elapsedTime = now - startTime;
-                if(elapsedTime > timeLimit) { // timeout
+                if(timeLimit && elapsedTime > timeLimit) { // timeout
                     reject({ error: `Connection timeout! maximum wait time is ${timeLimit / 1000}s, you probably forgot to start your Worker run 'python zeromq_messenger.py'` });
-                    setTimeout(()=>requester.close(), 500);
                 } else if(self.status == Status.SUCCESS){ // success
                     resolve(result);
-                    setTimeout(()=>requester.close(), 500);
                 } else if (self.status == Status.ERROR){ // error
                     reject({ error: 'An error ocurred!' });
-                    setTimeout(()=>requester.close(), 500);
                 } else {
                     setTimeout(finnish, 10);
+                    return;
                 }
+                setTimeout(()=> {
+                    if(input.type == 'train') {
+                        subscriber.close();
+                    } else {
+                        requester.close();
+                    }
+                }, 500);
             }
             finnish();
         });

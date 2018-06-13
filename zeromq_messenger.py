@@ -3,10 +3,14 @@ import numpy as np
 import json
 import signal
 import os
+import time
 
 url = 'tcp://*:5563'
+url2 = 'tcp://*:5562'
 context = zmq.Context()
 socket = context.socket(zmq.REP)
+publisher = context.socket(zmq.PUB)
+publisher.bind(url2)
 socket.bind(url)
 
 try:
@@ -29,6 +33,15 @@ try:
         elif requestParams['type'] == 'mean':
             results = {}
             results['data'] = int(np.mean(requestParams['data']))
+        elif requestParams['type'] == 'train':
+            epochs = int(requestParams['epochs'])
+            results = {}
+            results['data'] = {}
+            for i in range(epochs):
+                print('Epoch {}'.format(i))
+                results['data']['epoch'] = i
+                publisher.send_string(json.dumps(results, ensure_ascii=True))
+                time.sleep(1)
         elif requestParams['type'] == 'arange':
             results = {}
             start = requestParams['data']['start']
