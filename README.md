@@ -14,17 +14,6 @@ Run the python worker `python messenger.py`
 ### Start index.js
 Open other terminal window and run `npm run start`
 
-#### Output
-```
-max -> 10238               
-min -> 10                  
-sum -> 26209260            
-std -> 2953                
-mean -> 5124               
-arange array length -> 5115
-It took 0.404s
-```
-
 #### index.js Code
 ```javascript
 const Numpy = require('./numpy');
@@ -52,4 +41,15 @@ async function init() {
     console.log(`It took ${(endTime - startTime) / 1000}s`);
 }
 init();
+```
+
+#### Output
+```
+max -> 10238               
+min -> 10                  
+sum -> 26209260            
+std -> 2953                
+mean -> 5124               
+arange array length -> 5115
+It took 0.404s
 ```
