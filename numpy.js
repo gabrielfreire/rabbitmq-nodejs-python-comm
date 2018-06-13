@@ -10,27 +10,32 @@ class Numpy {
     }
 
     async max(ndarray){
+        if(!ndarray || !ndarray.length) return;
         const input = { type: 'max', data: ndarray };
         return await this._wrap(input);
     }
     async min(ndarray){
+        if(!ndarray || !ndarray.length) return;
         const input = { type: 'min', data: ndarray };
         return await this._wrap(input);
     }
     async mean(ndarray){
+        if(!ndarray || !ndarray.length) return;
         const input = { type: 'mean', data: ndarray };
         return await this._wrap(input);
     }
     async std(ndarray){
+        if(!ndarray || !ndarray.length) return;
         const input = { type: 'std', data: ndarray };
         return await this._wrap(input);
     }
     async sum(ndarray){
+        if(!ndarray || !ndarray.length) return;
         const input = { type: 'sum', data: ndarray };
         return await this._wrap(input);
     }
     async arange(start, stop = null, step = null, dtype = null){
-        if(!start) throw { error: 'Start argument is required' };
+        if(!start) throw { error: 'The 1st(start) argument is required' };
         const input = { type: 'arange', data: { start: start, stop: stop, step: step, dtype: dtype } };
         return await this._wrap(input);
     }

@@ -9,7 +9,8 @@ const Status = {
 }
 class ZMQWrap {
     constructor(connectionUrl) {
-        this.connectionUrl = connectionUrl || 'tcp://localhost:5563';
+        let local = 'tcp://localhost';
+        this.connectionUrl = connectionUrl || `${process.env.URL || local}:5563`;
         this.status = Status.UNINITIALIZED;
     }
 

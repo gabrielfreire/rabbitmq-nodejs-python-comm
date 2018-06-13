@@ -1,8 +1,8 @@
 import zmq
 import numpy as np
 import json
-import keyboard
 import signal
+import os
 
 url = 'tcp://*:5563'
 context = zmq.Context()
