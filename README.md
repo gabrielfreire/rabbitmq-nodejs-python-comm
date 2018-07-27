@@ -1,5 +1,5 @@
 # rabbitmq-nodejs-python-comm
-Communication between Python and NodeJS using RabbitMQ
+Examples of communication between Python and NodeJS using RabbitMQ, ZEROMQ and loading Python and Numpy using WebAssembly and CPython `PyodideNode/`
 
 `npm install`
 
@@ -9,7 +9,8 @@ Communication between Python and NodeJS using RabbitMQ
 `pip install pika`
 `pip install urllib3`
 
-Run the python worker `python messenger.py`
+Run the python worker for RabbitMQ `python messenger.py`
+Run the python worker for ZeroMQ `python zeromq_messenger.py`
 
 ### Start index.js
 Open other terminal window and run `npm run start`
@@ -17,11 +18,14 @@ Open other terminal window and run `npm run start`
 #### index.js Code
 ```javascript
 const Numpy = require('./numpy');
+// const Numpy = require('./webassembly_numpy');
 const np = new Numpy();
 
 async function init() {
+    // await np.init(); // webassembly
     let startTime = new Date().getTime();
     try {
+        // np.testNumpy(); // webassembly
         let arr = await np.arange(10, 10240, 2);
         let max = await np.max(arr);
         let sum = await np.sum(arr);
