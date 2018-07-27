@@ -57,3 +57,4 @@ mean -> 5124
 arange array length -> 5115
 It took 0.404s
 ```
+It is faster using webassembly `0.004s`
