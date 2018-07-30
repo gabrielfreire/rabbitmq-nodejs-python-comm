@@ -5,13 +5,15 @@ import signal
 import os
 import time
 
-url = 'tcp://*:5563'
-url2 = 'tcp://*:5562'
+responder_url = 'tcp://*:5563'
+publisher_url = 'tcp://*:5562'
 context = zmq.Context()
+# responder
 socket = context.socket(zmq.REP)
+socket.bind(responder_url)
+# publisher
 publisher = context.socket(zmq.PUB)
-publisher.bind(url2)
-socket.bind(url)
+publisher.bind(publisher_url)
 
 try:
     while True:
