@@ -2,6 +2,14 @@ const Numpy = require('./webassembly_numpy'); // webassembly
 const NumpyMQ = require('./numpy'); // RABBITMQ / ZEROMQ
 const np = new Numpy();
 const npMQ = new NumpyMQ();
+
+const testMethod = 
+'def test_method(value):\n' +
+'   list = [1, 20, 3, 12, 31, 501, 123, 320, 132]\n' +
+'   a = [x * 256 for x in list]\n' +
+'   b = [np.log(y)**2 for y in a]\n' +
+'   return np.array(b) * np.array(value)';
+
 async function init() {
     await np.init(); // webassembly
     let webAssStartTime = new Date().getTime();
@@ -14,15 +22,8 @@ async function init() {
                     'f = np.mean(a)\n' + 
                     'print("arange array length -> {}".format(len(a)))\n' 
                     ); // execute lines of python/numpy code
-        const pyMethod = np.createMethod({  // Create a python method using numpy
-            code: `def test_method(value):
-        list = [1, 20, 3, 12, 31, 501, 123, 320, 132]
-        a = [x * 256 for x in list]
-        b = [np.log(y)**2 for y in a]
-        return np.array(b) * np.array(value)`, 
-            
-            name: 'test_method'
-        });
+         // Create a python method using numpy
+        const pyMethod = np.createMethod({ code: testMethod, name: 'test_method' });
         const result = pyMethod(new Int32Array([1, 20, 3, 12, 31, 501, 123, 320, 132])); // calling the method created
         let webAssEndTime = new Date().getTime();
         console.log(result); // np.array(b) * np.array(value)
@@ -46,8 +47,8 @@ async function init() {
         console.log(`mean -> ${mean}`);
         console.log(`arange array length -> ${arr.length}`);
         let MQEndTime = new Date().getTime();
-        console.log(`It took ${(webAssEndTime - webAssStartTime) / 1000}s for the webassembly code to finish`);
         console.log(`It took ${(MQEndTime - MQStartTime) / 1000}s for the zeroMQ code to finish`);
+        console.log(`It took ${(webAssEndTime - webAssStartTime) / 1000}s for the webassembly code to finish`);
     } catch(e) {
         console.error(e);
     } finally {
